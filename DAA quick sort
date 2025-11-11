@@ -23,7 +23,11 @@
 //         2.Swap that element with the last element.
 //         3.Proceed as usual (partition using the last element).
 //     On average, randomized Quick Sort runs in O(n log n) for all inputs —
-//      even sorted ones — because random pivots prevent consistently unbalanced splits.    
+//      even sorted ones — because random pivots prevent consistently unbalanced splits.  
+
+//Algorithm	Best Case	Average Case	Worst Case	Strategy
+//Deterministic Quick Sort	O(n log n)	O(n log n)	O(n²)	Divide and Conquer
+//Randomized Quick Sort	O(n log n)	Expected O(n log n)	O(n²)	Divide and Conquer (with randomization)
 
 
 // In both the approach code overall working remains same but the way we pick pivot changes!!!!!
