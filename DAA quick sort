@@ -1,0 +1,90 @@
+// Quick Sort is a divide and conquer algorithm that:
+//  1.Picks a pivot element.
+//  2.Partitions the array so that all smaller elements go to 
+//    the left, larger ones to the right.
+//  3.Recursively sorts the two partitions.
+// Its performance heavily depends on how the pivot is chosen.
+
+// * Deterministic Quick Sort 
+//     Here the pivot is chosen using a fixed rule such as always last element or
+//     first ele or middle ele 
+//     --> If we always pick the last element as pivot, the behavior of 
+//         Quick Sort is deterministic — it will always make the 
+//         same comparisons for the same input.
+//     --> Problem : If the input is already sorted or nearly sorted,
+//         this pivot rule leads to worst-case time O(n²).
+
+// * Randomized Quick Sort 
+//     Here the pivot is chosen randomly from the subarray before each partition.
+//     That small randomization step destroys any input pattern that 
+//     could cause the worst case.
+//     --> working : 
+//         1.Choose a random index between low and high.
+//         2.Swap that element with the last element.
+//         3.Proceed as usual (partition using the last element).
+//     On average, randomized Quick Sort runs in O(n log n) for all inputs —
+//      even sorted ones — because random pivots prevent consistently unbalanced splits.    
+
+
+// In both the approach code overall working remains same but the way we pick pivot changes!!!!!
+#include <bits/stdc++.h>
+using namespace std;
+
+/*--------- DETERMINISTIC QUICK SORT ---------*/
+int partition(vector<int>& a, int low, int high) {
+    int pivot = a[high]; // fixed pivot (deterministic)
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (a[j] < pivot)
+            swap(a[++i], a[j]);
+    }
+    swap(a[i + 1], a[high]);
+    return i + 1;
+}
+
+void quickSortDet(vector<int>& a, int low, int high) {
+    if (low < high) {
+        int pi = partition(a, low, high);
+        quickSortDet(a, low, pi - 1);
+        quickSortDet(a, pi + 1, high);
+    }
+}
+
+/*--------- RANDOMIZED QUICK SORT ---------*/
+int randomPartition(vector<int>& a, int low, int high) {
+    int randPivot = low + rand() % (high - low + 1);
+    swap(a[randPivot], a[high]); // random pivot
+    return partition(a, low, high);
+}
+
+void quickSortRand(vector<int>& a, int low, int high) {
+    if (low < high) {
+        int pi = randomPartition(a, low, high);
+        quickSortRand(a, low, pi - 1);
+        quickSortRand(a, pi + 1, high);
+    }
+}
+
+/*--------- MAIN ---------*/
+int main() {
+    srand(time(0));
+    int n;
+    cout << "Enter number of elements: ";
+    cin >> n;
+    vector<int> arr(n);
+    cout << "Enter elements:\n";
+    for (int i = 0; i < n; i++) cin >> arr[i];
+
+    vector<int> arr1 = arr, arr2 = arr;
+
+    quickSortDet(arr1, 0, n - 1);
+    quickSortRand(arr2, 0, n - 1);
+
+    cout << "\nSorted by Deterministic Quick Sort:\n";
+    for (int x : arr1) cout << x << " ";
+
+    cout << "\n\nSorted by Randomized Quick Sort:\n";
+    for (int x : arr2) cout << x << " ";
+
+    cout << endl;
+}
