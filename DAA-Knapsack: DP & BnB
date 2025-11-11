@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+/*===================== DYNAMIC PROGRAMMING =====================*/
+int knapSackDP(int W, vector<int>& wt, vector<int>& val, int n) {
+    vector<int> dp(W + 1, 0);
+    for (int i = 0; i < n; i++) {
+        for (int w = W; w >= wt[i]; w--) {
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
+        }
+    }
+    return dp[W];
+}
+
+/*===================== BRANCH AND BOUND =====================*/
+struct Item { int value, weight; double ratio; };
+struct Node { int level, profit, weight; double bound; };
+
+double bound(Node u, int n, int W, vector<Item>& items) {
+    if (u.weight >= W) return 0;
+
+    double result = u.profit;
+    int totalWeight = u.weight;
+    int j = u.level + 1;
+
+    while (j < n && totalWeight + items[j].weight <= W) {
+        totalWeight += items[j].weight;
+        result += items[j].value;
+        j++;
+    }
+
+    if (j < n) result += (W - totalWeight) * items[j].ratio;
+    return result;
+}
+
+int knapSackBnB(int W, vector<int>& wt, vector<int>& val, int n) {
+    vector<Item> items(n);
+    for (int i = 0; i < n; i++)
+        items[i] = {val[i], wt[i], (double)val[i] / wt[i]};
+
+    sort(items.begin(), items.end(), [](auto& a, auto& b) {
+        return a.ratio > b.ratio;
+    });
+
+    queue<Node> q;
+    q.push({-1, 0, 0, 0});
+    int maxProfit = 0;
+
+    while (!q.empty()) {
+        Node v = q.front(); q.pop();
+        if (v.level == n - 1) continue;
+
+        // Include next item
+        Node u = {v.level + 1, v.profit + items[v.level + 1].value, 
+                  v.weight + items[v.level + 1].weight, 0};
+
+        if (u.weight <= W && u.profit > maxProfit)
+            maxProfit = u.profit;
+
+        u.bound = bound(u, n, W, items);
+        if (u.bound > maxProfit)
+            q.push(u);
+
+        // Exclude next item
+        u = {v.level + 1, v.profit, v.weight, bound({v.level + 1, v.profit, v.weight, 0}, n, W, items)};
+        if (u.bound > maxProfit)
+            q.push(u);
+    }
+
+    return maxProfit;
+}
+
+/*===================== MAIN =====================*/
+int main() {
+    int n, W;
+    cout << "Enter number of items: ";
+    cin >> n;
+
+    vector<int> wt(n), val(n);
+    cout << "Enter weights: ";
+    for (int& i : wt) cin >> i;
+
+    cout << "Enter values: ";
+    for (int& i : val) cin >> i;
+
+    cout << "Enter knapsack capacity: ";
+    cin >> W;
+
+    cout << "\nDynamic Programming Result: " << knapSackDP(W, wt, val, n);
+    cout << "\nBranch and Bound Result   : " << knapSackBnB(W, wt, val, n) << endl;
+
+    return 0;
+}
+
+//Enter number of items: 4
+//Enter weights: 2 3 4 5
+//Enter values: 3 4 5 6
+//Enter knapsack capacity: 5
