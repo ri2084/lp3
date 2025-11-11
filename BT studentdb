@@ -1,0 +1,154 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract StudentData {
+    struct Student{
+        string name;
+        string className;
+        uint256 age;
+        uint256 rollNo;
+    }
+
+    Student[] public students; 
+    mapping(uint256 => bool) private _rollExists;
+
+    address public owner;
+    event StudentAdd(string name, uint256 indexed rollNo);
+
+    modifier onlyOwner(){
+        require(msg.sender == owner);
+        _;
+    }
+    constructor() {
+        owner = msg.sender;
+    }
+
+
+    function addStudent(
+        string calldata _name,
+        uint256 _age,
+        string calldata  _className,
+        uint256 _rollNo 
+    ) external onlyOwner{
+        require(bytes(_name).length > 0 && bytes(_className).length > 0, "Invalid Name or Class field");
+        require(_age > 0 && _age <= 150, "Invalid Age Field");
+        require(!_rollExists[_rollNo], "The Roll Number already Exists");
+
+        Student memory tempStudent = Student({
+            name: _name,
+            age: _age,
+            className: _className,
+            rollNo: _rollNo
+        });
+        students.push(tempStudent);
+        _rollExists[_rollNo] = true;
+        emit StudentAdd(_name,  _rollNo);
+    }
+
+    function getTotalStudents() public view returns(uint256) { return students.length;}
+
+    function getStudent(uint256 index) public view returns(string memory, uint256, string memory, uint256){
+        require(index < students.length, "Invalid Index Entered");
+        Student storage s = students[index];
+        return (s.name, s.age, s.className, s.rollNo);
+    }
+}
+
+
+
+WITH EXPLANATION:
+
+// SPDX-License-Identifier: MIT
+// This line specifies the license under which the code is released — here it’s MIT, a permissive open-source license.
+pragma solidity ^0.8.0;
+// This specifies the Solidity compiler version. It means this contract requires compiler version 0.8.0 or higher (but below 0.9.0).
+
+
+// Define a smart contract named StudentData
+contract StudentData {
+
+    // Define a struct to hold individual student information
+    struct Student {
+        string name;         // Name of the student
+        string className;    // Class or grade the student is in
+        uint256 age;         // Age of the student
+        uint256 rollNo;      // Unique roll number assigned to the student
+    }
+
+    // Declare a dynamic array to store multiple Student records
+    Student[] public students; 
+
+    // A mapping to keep track of existing roll numbers to prevent duplicates
+    mapping(uint256 => bool) private _rollExists;
+
+    // Store the address of the contract owner (the account that deploys this contract)
+    address public owner;
+
+    // Declare an event that will be emitted whenever a new student is added
+    event StudentAdd(string name, uint256 indexed rollNo);
+
+    // Modifier to restrict function access to only the contract owner
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can call this function");
+        // The 'require' statement ensures only the owner can proceed
+        _;
+        // The underscore means “execute the rest of the function after this check”
+    }
+
+    // Constructor runs only once — when the contract is deployed
+    constructor() {
+        owner = msg.sender;  // The deployer of the contract becomes the owner
+    }
+
+
+    // Function to add a new student record
+    function addStudent(
+        string calldata _name,        // Student's name (passed as calldata for gas efficiency)
+        uint256 _age,                 // Student's age
+        string calldata _className,   // Student's class name
+        uint256 _rollNo               // Student's roll number
+    ) external onlyOwner {            // Only the owner can call this function
+        // Validate name and class fields to ensure they are not empty
+        require(bytes(_name).length > 0 && bytes(_className).length > 0, "Invalid Name or Class field");
+        // Validate age to ensure it's within a realistic range
+        require(_age > 0 && _age <= 150, "Invalid Age Field");
+        // Ensure the roll number hasn’t been used already
+        require(!_rollExists[_rollNo], "The Roll Number already Exists");
+
+        // Create a new Student struct in memory with provided data
+        Student memory tempStudent = Student({
+            name: _name,
+            age: _age,
+            className: _className,
+            rollNo: _rollNo
+        });
+
+        // Add the new student to the students array
+        students.push(tempStudent);
+
+        // Mark this roll number as used to prevent duplicates
+        _rollExists[_rollNo] = true;
+
+        // Emit an event to log the addition of a new student (for external tracking)
+        emit StudentAdd(_name, _rollNo);
+    }
+
+    // Function to get the total number of students stored
+    function getTotalStudents() public view returns(uint256) {
+        return students.length; // Return the size of the students array
+    }
+
+    // Function to get details of a student by their array index
+    function getStudent(uint256 index) public view 
+        returns(string memory, uint256, string memory, uint256) 
+    {
+        // Ensure the provided index is valid
+        require(index < students.length, "Invalid Index Entered");
+
+        // Fetch the student data from storage
+        Student storage s = students[index];
+
+        // Return the student's details: name, age, className, and rollNo
+        return (s.name, s.age, s.className, s.rollNo);
+    }
+}
