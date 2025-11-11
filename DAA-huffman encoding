@@ -108,3 +108,7 @@ int main() {
 
     return 0;
 }
+
+
+//vector<char> characters = {'a', 'b', 'c', 'd', 'e', 'f'};
+  //  vector<int> frequencies = {5, 9, 12, 13, 16, 45};
