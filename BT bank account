@@ -1,0 +1,136 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract BankAccount {
+    address public owner;
+    uint256 private balance;
+
+    event Deposit(address indexed account, uint256 amount);
+    event Withdrawal(address indexed account, uint256 amount);
+
+    constructor() {
+        owner = msg.sender;
+        balance = 0;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action");
+        _;
+    }
+
+    function deposit() public payable {
+        require(msg.value > 0, "Deposit amount must be greater than 0");
+        balance += msg.value;
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function withdraw(uint256 amount) public onlyOwner {
+        require(amount > 0, "Withdrawal amount must be greater than 0");
+        require(amount <= balance, "Insufficient funds");
+        balance -= amount;
+        payable(owner).transfer(amount);
+        emit Withdrawal(msg.sender, amount);
+    }
+
+    function getBalance() public view returns (uint256) {
+        return balance;
+    }
+}
+
+
+
+
+WITH EXPLANATION:
+// SPDX-License-Identifier: MIT
+// SPDX license identifier: Specifies that this smart contract is licensed under the MIT License.
+// It is required by Solidity compilers (since v0.6.8) for license compliance and code reuse clarity.
+
+pragma solidity ^0.8.0;
+// Specifies the Solidity compiler version required for this contract.
+// "^0.8.0" means any version 0.8.x or above, but less than 0.9.0.
+// Solidity 0.8+ automatically prevents integer overflow/underflow.
+
+contract BankAccount {
+    // 'contract' keyword defines a smart contract named 'BankAccount'.
+    // A contract in Solidity is similar to a class in object-oriented programming.
+
+    address public owner;
+    // Declares a public variable of type 'address' called 'owner'.
+    // 'address' stores the 20-byte Ethereum wallet address of the contract owner.
+    // 'public' automatically creates a getter function so anyone can read its value.
+
+    uint256 private balance;
+    // Declares a private unsigned integer variable 'balance' to store the account balance.
+    // 'uint256' can hold very large numbers (up to 2^256 - 1).
+    // 'private' means only functions inside this contract can access it.
+
+    // Events allow logging on the blockchain — useful for external apps to track contract activity.
+    event Deposit(address indexed account, uint256 amount);
+    // 'Deposit' event logs who deposited (account) and how much (amount).
+    // 'indexed' allows filtering events by that parameter in blockchain explorers.
+
+    event Withdrawal(address indexed account, uint256 amount);
+    // 'Withdrawal' event logs who withdrew funds and how much was withdrawn.
+
+    constructor() {
+        // Constructor is executed only once when the contract is first deployed.
+        owner = msg.sender;
+        // 'msg.sender' is the address that deployed the contract.
+        // Here, we set the 'owner' as the deployer’s address.
+
+        balance = 0;
+        // Initializes balance to zero at contract deployment.
+    }
+
+    modifier onlyOwner() {
+        // A modifier is used to apply reusable access control logic to functions.
+        require(msg.sender == owner, "Only the owner can perform this action");
+        // 'require' checks if the condition is true. If not, it reverts the transaction with an error message.
+        // This ensures that only the owner can call functions using this modifier.
+        _;
+        // The '_;' indicates where the body of the function that uses this modifier will execute.
+    }
+
+    function deposit() public payable {
+        // A public function that allows anyone to deposit Ether into the contract.
+        // 'payable' is required to allow the function to receive Ether.
+
+        require(msg.value > 0, "Deposit amount must be greater than 0");
+        // Checks that some Ether is actually being sent.
+
+        balance += msg.value;
+        // Adds the amount of Ether sent (msg.value) to the internal balance.
+
+        emit Deposit(msg.sender, msg.value);
+        // Emits a Deposit event with the depositor’s address and amount.
+    }
+
+    function withdraw(uint256 amount) public onlyOwner {
+        // Public function that allows the owner to withdraw Ether from the contract.
+        // The 'onlyOwner' modifier ensures only the owner can execute this function.
+
+        require(amount > 0, "Withdrawal amount must be greater than 0");
+        // Ensures that withdrawal amount is positive.
+
+        require(amount <= balance, "Insufficient funds");
+        // Checks that the contract has enough balance to withdraw.
+
+        balance -= amount;
+        // Deducts the withdrawn amount from the contract balance.
+
+        payable(owner).transfer(amount);
+        // Transfers the specified amount of Ether to the owner’s address.
+        // 'payable' is used to allow sending Ether.
+
+        emit Withdrawal(msg.sender, amount);
+        // Emits a Withdrawal event to log this transaction.
+    }
+
+    function getBalance() public view returns (uint256) {
+        // A read-only (view) function to return the current contract balance.
+        // 'view' means it does not modify the blockchain state.
+
+        return balance;
+        // Returns the internal balance value.
+    }
+}
