@@ -126,3 +126,39 @@ A: Use accuracy, precision, recall, F1-score, and the confusion matrix.
 * Predicting defaults or product returns.
 * Any binary decision based on customer features.
 
+
+🧠 What is an Artificial Neural Network (ANN)?
+An ANN is a computer model inspired by how the human brain works.
+It is made up of neurons (nodes) that are connected by weights.
+Each neuron receives inputs, multiplies them by weights, sums them up, and passes the result through an activation function to produce an output.
+
+⚙️ Structure of an ANN
+Input Layer – takes the input features (data values).
+Hidden Layer(s) – processes data and learns patterns.
+Output Layer – gives the final prediction or class.
+Each layer passes information forward through the network.
+
+🎯 Training the Network
+ANN learns using supervised training — the correct outputs (labels) are known.
+The model makes predictions, compares them with the correct answers, and computes errors.
+These errors are sent backward through the network to adjust weights — this is called backpropagation.
+The process repeats many times until errors are small and the network learns well.
+
+🔁 Feedforward and Backpropagation
+Feedforward: Data flows from input → hidden → output to make predictions.
+Backpropagation: The error flows backward to update weights using the Delta Rule (adjust weights in proportion to error).
+This loop continues until the model performs well.
+
+⚖️ Designing the Network
+The number of layers and neurons depends on the problem’s complexity.
+More complex data → more neurons/layers.
+Too many neurons → model memorizes training data (overfitting).
+Use enough training data to help the network generalize, not just memorize.
+
+✅ Advantages
+Can learn complex and non-linear relationships.
+Works well even with noisy or incomplete data.
+Can classify unseen patterns once trained.
+
+💡 In short
+An ANN mimics the brain: it takes inputs, learns patterns by adjusting weights through trial and error (training), and produces accurate outputs after learning through feedforward + backpropagation
