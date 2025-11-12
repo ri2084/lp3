@@ -4,7 +4,7 @@ import numpy as np                       # numeric ops
 from sklearn.model_selection import train_test_split  # split data
 from sklearn.preprocessing import StandardScaler      # feature scaling
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
-from sklearn.neural_network import MLPClassifier      # neural network model
+from sklearn.neural_network import MLPClassifier      # neural network model # multi-layer perceptron
 import seaborn as sns                    # plotting heatmap
 import matplotlib.pyplot as plt          # plotting
 
