@@ -42,7 +42,25 @@ model = MLPClassifier(
     max_iter=500,                         # max epochs (increased to avoid early convergence warning)
     random_state=42
 )
+===============================================================================
+Creates a Multi-Layer Perceptron (MLP) classifier.
 
+Architecture: 3 hidden layers (64, 32, 16 neurons).
+
+Activation: 'relu' → fast and efficient for deep networks.
+
+Solver: 'adam' → adaptive gradient descent optimizer.
+
+Alpha: L2 regularization term to avoid overfitting.
+
+learning_rate='adaptive'` → automatically adjusts learning rate.
+
+early_stopping=True → stops when performance stops improving (avoids overtraining).
+
+max_iter=500 → allows enough training epochs.
+
+random_state=42 → ensures reproducibility.
+====================================================================================
 model.fit(X_train, y_train)                # train the model on training data
 
 # 8. Make predictions on the test set
