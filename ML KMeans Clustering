@@ -1,0 +1,145 @@
+# ==========================================================
+# 📘 K-Means Clustering on Sales Data
+# Task: Group sales records into meaningful clusters
+# Author: <Your Name>
+# ==========================================================
+
+# 1️⃣ Import necessary libraries
+import pandas as pd                  # for reading and handling dataset
+import numpy as np                   # for numerical operations
+from sklearn.preprocessing import StandardScaler  # for feature scaling
+from sklearn.cluster import KMeans   # for K-Means clustering algorithm
+import matplotlib.pyplot as plt      # for plotting graphs
+import seaborn as sns                # for better visualizations
+
+# ----------------------------------------------------------
+# 2️⃣ Load dataset
+data = pd.read_csv('a5_clustering.csv', encoding='latin1')  # read the CSV file
+print("✅ Dataset loaded successfully.\n")
+print(data.head())  # display first 5 rows to inspect structure and columns
+
+# ----------------------------------------------------------
+# 3️⃣ Select relevant numerical features for clustering
+# (We choose numeric attributes that make sense for grouping sales)
+features = data[['SALES', 'QUANTITYORDERED', 'PRICEEACH', 'MSRP']].dropna()  # remove missing values
+
+# ----------------------------------------------------------
+# 4️⃣ Normalize features to make them comparable
+scaler = StandardScaler()                      # create scaling object
+scaled_features = scaler.fit_transform(features)  # fit and transform to standardize values (mean=0, std=1)
+
+# ----------------------------------------------------------
+# 5️⃣ Determine optimal number of clusters using Elbow Method
+inertia = []                                   # to store inertia values for each k
+K = range(1, 11)                               # test k values from 1 to 10
+
+for k in K:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)  # initialize KMeans with k clusters
+    kmeans.fit(scaled_features)                 # fit model to scaled data
+    inertia.append(kmeans.inertia_)             # store sum of squared distances (inertia)
+
+# ----------------------------------------------------------
+# 6️⃣ Plot Elbow Curve to find best k
+plt.figure(figsize=(8, 5))
+plt.plot(K, inertia, 'bo-')                    # blue dots connected by line
+plt.title("Elbow Method to Find Optimal K")
+plt.xlabel("Number of Clusters (k)")
+plt.ylabel("Inertia (Sum of squared distances)")
+plt.grid(True)
+plt.show()
+
+# ----------------------------------------------------------
+# 7️⃣ Train final K-Means model with chosen k (from elbow plot)
+optimal_k = 3                                  # assume elbow suggests k=3
+kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)  # create model
+data['Cluster'] = kmeans.fit_predict(scaled_features)  # assign cluster IDs to data
+
+# ----------------------------------------------------------
+# 8️⃣ Display sample results with cluster labels
+print("\n📊 Clustered Data Sample:")
+print(data[['SALES', 'QUANTITYORDERED', 'PRICEEACH', 'Cluster']].head())
+
+# ----------------------------------------------------------
+# 9️⃣ Visualize clusters (example: Sales vs Quantity Ordered)
+plt.figure(figsize=(8, 6))
+sns.scatterplot(
+    x=data['SALES'],
+    y=data['QUANTITYORDERED'],
+    hue=data['Cluster'],              # color points by cluster
+    palette='viridis',
+    s=60
+)
+plt.title(f"K-Means Clusters (k={optimal_k}): Sales vs Quantity Ordered")
+plt.xlabel("Sales")
+plt.ylabel("Quantity Ordered")
+plt.legend(title="Cluster")
+plt.grid(True)
+plt.show()
+
+# ==========================================================
+# 🧠 Theory Summary
+# ----------------------------------------------------------
+# K-Means partitions data into k clusters by minimizing within-cluster variance.
+# The Elbow Method helps decide optimal k — where inertia reduction slows.
+# Feature scaling is required since K-Means uses Euclidean distance.
+#
+# 🗣️ Viva Q&A:
+# Q1. What is inertia?
+#     → Sum of squared distances of samples to their nearest cluster center.
+# Q2. Why scale features?
+#     → To prevent large-valued features from dominating distance calculations.
+# Q3. How do we choose k?
+#     → Using elbow plot, silhouette score, or domain knowledge.
+# Q4. What does n_init mean?
+#     → Runs K-Means multiple times with different centroid seeds and keeps best result.
+# Q5. What if clusters overlap?
+#     → Try more features, increase k, or use other algorithms (DBSCAN, hierarchical).
+#
+# ⚙️ Time Complexity:  O(n × k × i × d)
+#    Space Complexity: O(n × d) + O(k × d)
+#
+# 💡 Applications:
+#   - Customer segmentation for marketing
+#   - Grouping products by sales or price
+#   - Discovering inventory or demand patterns
+#   - Market basket segmentation
+# ==========================================================
+The Elbow Method in K-Means Clustering
+The Elbow Method is a technique used to determine the optimal number of clusters in K-Means Clustering, an unsupervised learning algorithm often used for data segmentation.
+
+How the Elbow Method Works
+Choose a range of values for 
+: Run the K-Means clustering algorithm multiple times, each time with a different number of clusters ( k ), usually starting from 
+ up to a larger number (like 10 or 20).
+
+Calculate the Within-Cluster Sum of Squares (WCSS) for each value of 
+: The WCSS measures the total variance within each cluster. For each cluster, this is the sum of squared distances between each point and the centroid of the cluster. Lower WCSS values indicate that points are closer to their cluster centroids, which is generally desirable.
+
+ 
+ 
+
+where:
+
+ is the number of clusters,
+ represents each cluster,
+ is a data point in cluster 
+, and
+ is the centroid of cluster 
+.
+Plot 
+ vs. WCSS: As 
+ increases, WCSS typically decreases (as more clusters can better "fit" the data points within each cluster). However, after a certain point, the marginal decrease in WCSS becomes minimal.
+
+Identify the "Elbow" Point: Look for a point on the plot where the rate of decrease sharply slows down, creating an "elbow" shape. The location of this "elbow" is considered the optimal number of clusters, as increasing 
+ beyond this point results in diminishing returns in terms of improved cluster compactness.
+
+Why the Elbow Point is Optimal
+The elbow point indicates a balance between two competing factors:
+
+Minimizing WCSS: Having well-defined clusters where points are close to their centroids.
+Avoiding Overfitting: Not having so many clusters that the model starts to "overfit" the natural groupings in the data.
+Choosing 
+ at the elbow helps achieve meaningful clustering while maintaining model simplicity.
+
+Inertia in K-Means Clustering
+In the context of K-Means clustering and the Elbow Method, inertia is another term for the Within-Cluster Sum of Squares (WCSS). It represents how well the clusters formed by the K-Means algorithm fit the data points. Specifically, inertia measures the sum of squared distances between each data point and the centroid of the cluster to which it has been assigned.
