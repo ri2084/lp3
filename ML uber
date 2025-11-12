@@ -1,0 +1,184 @@
+# ============================================================
+# ML ASSIGNMENT 1 — UBER FARE PREDICTION
+# ============================================================
+
+# -------------------- 1. IMPORT LIBRARIES --------------------
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+# -------------------- 2. LOAD DATASET --------------------
+df = pd.read_csv("a1_uber.csv")  # Change path if needed
+print("Initial Data Shape:", df.shape)
+print("\nSample Data:")
+print(df.head())
+
+# -------------------- 3. DATA CLEANING --------------------
+# Convert datetime column
+if 'key' in df.columns:
+    df['key'] = pd.to_datetime(df['key'], errors='coerce')
+    df['time'] = df['key'].dt.hour
+elif 'pickup_datetime' in df.columns:
+    df['pickup_datetime'] = pd.to_datetime(df['pickup_datetime'], errors='coerce')
+    df['time'] = df['pickup_datetime'].dt.hour
+
+# Drop irrelevant columns
+drop_cols = [col for col in ['Unnamed: 0', 'key', 'pickup_datetime'] if col in df.columns]
+df.drop(columns=drop_cols, inplace=True, errors='ignore')
+
+# Drop rows with missing essential values
+df.dropna(subset=['pickup_longitude','pickup_latitude','dropoff_longitude',
+                  'dropoff_latitude','fare_amount','time'], inplace=True)
+
+print("\nAfter Cleaning Shape:", df.shape)
+
+# -------------------- 4. FEATURE ENGINEERING (Haversine Distance) --------------------
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Earth radius in km
+    lat1, lon1, lat2, lon2 = map(np.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = np.sin(dlat/2)**2 + np.cos(lat1)*np.cos(lat2)*np.sin(dlon/2)**2
+    return R * 2 * np.arctan2(np.sqrt(a), np.sqrt(1 - a))
+
+df['distance_km'] = haversine(df['pickup_latitude'], df['pickup_longitude'],
+                              df['dropoff_latitude'], df['dropoff_longitude'])
+print("\nAdded 'distance_km' feature successfully.")
+
+# -------------------- 5. REMOVE INVALID / OUTLIER VALUES --------------------
+# 5.1 Filter invalid coordinates (NYC region)
+df = df[(df['pickup_latitude'].between(40, 42)) &
+        (df['pickup_longitude'].between(-75, -72)) &
+        (df['dropoff_latitude'].between(40, 42)) &
+        (df['dropoff_longitude'].between(-75, -72))]
+
+# 5.2 Remove invalid fare, distance, passengers
+df = df[(df['fare_amount'] > 0) & (df['distance_km'] > 0)]
+df = df[df['passenger_count'].between(1, 6)]
+
+print("Shape after coordinate and logical filtering:", df.shape)
+
+# 5.3 Visualize outliers before cleaning
+plt.figure(figsize=(10,5))
+plt.subplot(1,2,1)
+sns.boxplot(y=df['fare_amount'])
+plt.title("Boxplot - Fare Amount (Before IQR Cleaning)")
+
+plt.subplot(1,2,2)
+sns.boxplot(y=df['distance_km'])
+plt.title("Boxplot - Distance (Before IQR Cleaning)")
+plt.tight_layout()
+plt.show()
+
+# 5.4 Remove outliers using IQR
+def remove_outliers_iqr(dataframe, column):
+    Q1 = dataframe[column].quantile(0.25)
+    Q3 = dataframe[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+    return dataframe[(dataframe[column] >= lower) & (dataframe[column] <= upper)]
+
+df = remove_outliers_iqr(df, 'fare_amount')
+df = remove_outliers_iqr(df, 'distance_km')
+
+print("\nAfter IQR-based Outlier Removal Shape:", df.shape)
+
+# 5.5 Visualize after cleaning
+plt.figure(figsize=(10,5))
+plt.subplot(1,2,1)
+sns.boxplot(y=df['fare_amount'])
+plt.title("Boxplot - Fare Amount (After IQR Cleaning)")
+
+plt.subplot(1,2,2)
+sns.boxplot(y=df['distance_km'])
+plt.title("Boxplot - Distance (After IQR Cleaning)")
+plt.tight_layout()
+plt.show()
+
+# -------------------- 6. EXPLORATORY DATA ANALYSIS (EDA) --------------------
+print("\nSummary Statistics:")
+print(df.describe())
+
+# Fare distribution
+plt.figure(figsize=(6,4))
+sns.histplot(df['fare_amount'], bins=50, kde=True)
+plt.title("Distribution of Fare Amounts")
+plt.show()
+
+# Correlation heatmap
+corr = df.corr(method="pearson")
+plt.figure(figsize=(8,6))
+sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f")
+plt.title("Feature Correlation Heatmap")
+plt.show()
+
+# -------------------- 7. TRAIN-TEST SPLIT --------------------
+X = df[['pickup_longitude','pickup_latitude','dropoff_longitude','dropoff_latitude',
+        'passenger_count','time','distance_km']]
+y = df['fare_amount']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)
+
+print("\nTraining Data Shape:", X_train.shape)
+print("Testing Data Shape:", X_test.shape)
+
+# -------------------- 8. FEATURE SCALING --------------------
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+print("\nFeature scaling completed.")
+
+# -------------------- 9. MODEL 1 – LINEAR REGRESSION --------------------
+lr = LinearRegression()
+lr.fit(X_train_scaled, y_train)
+y_pred_lr = lr.predict(X_test_scaled)
+
+rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr))
+r2_lr = r2_score(y_test, y_pred_lr)
+
+print("\n--- Linear Regression Results ---")
+print(f"RMSE: {rmse_lr:.3f}")
+print(f"R² Score: {r2_lr:.3f}")
+
+# -------------------- 10. MODEL 2 – RANDOM FOREST REGRESSOR --------------------
+rf = RandomForestRegressor(n_estimators=200, random_state=42, n_jobs=-1)
+rf.fit(X_train_scaled, y_train)
+y_pred_rf = rf.predict(X_test_scaled)
+
+rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+r2_rf = r2_score(y_test, y_pred_rf)
+
+print("\n--- Random Forest Regression Results ---")
+print(f"RMSE: {rmse_rf:.3f}")
+print(f"R² Score: {r2_rf:.3f}")
+
+# -------------------- 11. MODEL PERFORMANCE COMPARISON --------------------
+comparison = pd.DataFrame({
+    "Model": ["Linear Regression", "Random Forest"],
+    "RMSE": [rmse_lr, rmse_rf],
+    "R² Score": [r2_lr, r2_rf]
+})
+
+print("\nModel Performance Comparison:\n")
+print(comparison)
+
+plt.figure(figsize=(6,4))
+sns.barplot(x="Model", y="R² Score", data=comparison)
+plt.title("Model R² Comparison")
+plt.show()
+
+plt.figure(figsize=(6,4))
+sns.barplot(x="Model", y="RMSE", data=comparison)
+plt.title("Model RMSE Comparison")
+plt.show()
+
+
