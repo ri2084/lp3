@@ -112,3 +112,23 @@ operations:
 4. Hit Get Balance to view the current balance
 
 ![image](https://github.com/user-attachments/assets/f3fdef58-ae43-4253-903d-b940aac2ce76)
+
+
+
+
+=====================================================
+function takeLoan(uint256 principal, uint256 months) public {
+    require(principal > 0, "Loan amount must be greater than zero");
+    uint256 interestRate = 5; // initial 5% interest
+    uint256 total = principal;
+
+    // increase interest by 0.5% every month and apply it
+    for (uint256 i = 0; i < months; i++) {
+        interestRate += 0.5; // 0.5% increase each month
+        total += (total * interestRate) / 100;
+    }
+
+    // Display total amount to be repaid
+    // (in practical contract, this could transfer or store values)
+    emit LoanTaken(msg.sender, principal, total);
+}
