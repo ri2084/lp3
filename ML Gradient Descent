@@ -92,6 +92,15 @@ Local minima occurs at x = -3.000000, f(x) = 0.000000
 
 ## 📘 **Theory (simple)**
 
+Gradient Descent (also called Steepest Descent) is an iterative optimization algorithm used to minimize a function by adjusting its parameters step by step. 
+It is widely used in machine learning and deep learning to minimize the cost function, thereby reducing the error between predicted and actual results.
+The algorithm works by:
+Calculating the derivative (gradient) of the function to find the slope.
+Updating parameters by moving in the opposite direction of the gradient (downhill) by a factor called the learning rate (α), which controls the step size.
+By repeating these steps, the algorithm converges to a local (or global) minimum of the function.
+Moving toward the gradient leads to a maximum (called Gradient Ascent), while moving against it leads to a minimum (Gradient Descent).
+It was first introduced by Augustin-Louis Cauchy in the 18th century and remains a core method for optimizing models in AI and data science today.
+
 * **Gradient Descent:**
   An optimization method used to find the minimum value of a function.
   It works by moving opposite to the direction of the gradient (slope).
