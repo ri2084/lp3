@@ -36,3 +36,8 @@ int main() {
 
     return 0;
 }
+
+ Method    | Time Complexity | Space Complexity | Remarks                                                    |
+| --------- | --------------- | ---------------- | ---------------------------------------------------------- |
+| Recursive | O(2ⁿ)           | O(n)             | Simple logic, exponential time due to repeated subproblems |
+| Iterative | O(n)            | O(1)             | Efficient, runs fast even for large n                      |
