@@ -112,3 +112,7 @@ int main() {
 
 //vector<char> characters = {'a', 'b', 'c', 'd', 'e', 'f'};
   //  vector<int> frequencies = {5, 9, 12, 13, 16, 45};
+ Type                 | Complexity | Explanation                                                  |
+| -------------------- | ---------- | ------------------------------------------------------------ |
+| **Time Complexity**  | O(n log n) | Building heap and combining nodes (n = number of characters) |
+| **Space Complexity** | O(n)       | Storing tree nodes, frequency map, and Huffman codes         |
